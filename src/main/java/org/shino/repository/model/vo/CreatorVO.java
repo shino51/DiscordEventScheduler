@@ -1,4 +1,4 @@
-package org.shino.vo;
+package org.shino.repository.model.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

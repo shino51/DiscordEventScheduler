@@ -1,7 +1,7 @@
-package org.shino.handler;
+package org.shino.handler.dispatcher;
 
 import org.shino.repository.model.dto.DiscordEventDTO;
-import org.shino.handler.dispatcher.DiscordEventDispatcher;
+import org.shino.repository.model.dto.EventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,10 +15,10 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Component
-public class GetScheduledEventsHandler {
+public class DiscordEventDispatcher {
 
-  @Autowired
-  private DiscordEventDispatcher eventDispatcher;
+  @Value("${auth.token}")
+  private String authToken;
 
   @Value("${discord.api.url}")
   private String discordApiUrl;
@@ -29,22 +29,35 @@ public class GetScheduledEventsHandler {
   @Autowired
   private RestTemplate restTemplate;
 
-  @Value("${auth.token}")
-  private String authToken;
+  public List<DiscordEventDTO> getRequest(String tailedUrl) {
+    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
 
-  public List<DiscordEventDTO> run() {
-    String url = discordApiUrl + "/guilds/" + guildId + "/scheduled-events";
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Authorization", authToken);
-    HttpEntity<String> request = new HttpEntity<>(headers);
     ResponseEntity<List<DiscordEventDTO>> response = restTemplate.exchange(
       url,
       HttpMethod.GET,
-      request,
+      new HttpEntity<>(createHeader()),
       new ParameterizedTypeReference<>() {
       }
     );
     return response.getBody();
+  }
+
+  public DiscordEventDTO postRequest(String tailedUrl, EventDTO body) {
+    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
+
+    HttpEntity<EventDTO> requestEntity = new HttpEntity<>(body, createHeader());
+    ResponseEntity<DiscordEventDTO> response = restTemplate.postForEntity(
+      url,
+      requestEntity,
+      DiscordEventDTO.class
+    );
+    return response.getBody();
+  }
+
+
+  private HttpHeaders createHeader() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Authorization", authToken);
+    return headers;
   }
 }

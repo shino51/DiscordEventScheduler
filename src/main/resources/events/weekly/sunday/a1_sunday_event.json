@@ -1,9 +1,0 @@
-{
-  "channel_id": "1041441815854854184",
-  "name": "テスト",
-  "description": "APIを使ってイベントを作成するテストです",
-  "scheduled_start_time": "2024-02-18T12:00:00.00",
-  "scheduled_end_time": "2024-02-18T13:00:00.00",
-  "entity_type": 2,
-  "privacy_level": 2
-}

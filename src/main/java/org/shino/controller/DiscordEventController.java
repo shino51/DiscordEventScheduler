@@ -1,8 +1,8 @@
 package org.shino.controller;
 
 import org.shino.service.DiscordEventService;
-import org.shino.vo.CreateEventVO;
-import org.shino.vo.DiscordEventDTO;
+import org.shino.repository.model.vo.CreateEventVO;
+import org.shino.repository.model.dto.DiscordEventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -35,9 +35,9 @@ public class DiscordEventController {
 
   @PostMapping("/create/weekly")
   @ResponseBody
-  public ResponseEntity<String> createWeeklyEvent(@RequestBody CreateEventVO createEventVO) {
+  public ResponseEntity<List<DiscordEventDTO>> createWeeklyEvent(@RequestBody CreateEventVO createEventVO) {
     // call discord API to create a event
-    String result = service.createWeeklyEvent(createEventVO);
+    List<DiscordEventDTO> result = service.createWeeklyEvent(createEventVO);
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 }

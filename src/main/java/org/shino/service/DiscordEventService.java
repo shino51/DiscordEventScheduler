@@ -2,8 +2,8 @@ package org.shino.service;
 
 import org.shino.handler.CreateEventWeeklyHandler;
 import org.shino.handler.GetScheduledEventsHandler;
-import org.shino.vo.CreateEventVO;
-import org.shino.vo.DiscordEventDTO;
+import org.shino.repository.model.vo.CreateEventVO;
+import org.shino.repository.model.dto.DiscordEventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,8 @@ public class DiscordEventService {
   public List<DiscordEventDTO> getListOfScheduledEvents() {
     return getScheduledEventsHandler.run();
   }
-  public String createWeeklyEvent(CreateEventVO createEventVO) {
-    return "";
+
+  public List<DiscordEventDTO> createWeeklyEvent(CreateEventVO createEventVO) {
+    return createEventWeeklyHandler.run(createEventVO);
   }
 }
