@@ -1,7 +1,7 @@
 package org.shino.repository;
 
-import org.shino.repository.model.Event;
-import org.shino.repository.model.Frequency;
+import org.shino.model.Event;
+import org.shino.model.Frequency;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

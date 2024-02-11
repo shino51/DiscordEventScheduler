@@ -1,8 +1,8 @@
 package org.shino.controller;
 
 import org.shino.service.DiscordEventService;
-import org.shino.repository.model.vo.CreateEventVO;
-import org.shino.repository.model.dto.DiscordEventDTO;
+import org.shino.model.vo.CreateEventVO;
+import org.shino.model.dto.DiscordEventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package org.shino.repository.model;
+package org.shino.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Event {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy=GenerationType.IDENTITY)
   private Integer id;
 
   @Column(name = "NAME")
@@ -26,8 +26,10 @@ public class Event {
   private String channelId;
 
   @Column(name = "FREQUENCY")
+
   @Enumerated(EnumType.STRING)
   private Frequency frequency;
+//  private String frequency;
 
   @Column(name = "START_TIME")
   private Integer startTime;

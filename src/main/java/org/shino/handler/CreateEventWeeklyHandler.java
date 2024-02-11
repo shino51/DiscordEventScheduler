@@ -2,12 +2,12 @@ package org.shino.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
-import org.shino.repository.model.Event;
-import org.shino.repository.model.Frequency;
-import org.shino.repository.model.dto.CreateEventDTO;
-import org.shino.repository.model.dto.DiscordEventDTO;
+import org.shino.model.Event;
+import org.shino.model.Frequency;
+import org.shino.model.dto.CreateEventDTO;
+import org.shino.model.dto.DiscordEventDTO;
 import org.shino.repository.EventRepository;
-import org.shino.repository.model.vo.CreateEventVO;
+import org.shino.model.vo.CreateEventVO;
 import org.springframework.stereotype.Component;
 
 import java.time.*;
@@ -41,7 +41,6 @@ public class CreateEventWeeklyHandler {
 
     List<Event> events = repository.findByFrequency(Frequency.EVERY_SUNDAY);
     // get how many weeks in this month
-    //
     LocalDate firstDayOfMonth = vo.getFirstDayOfMonth();
 
     for (Event event: events) {
@@ -61,6 +60,7 @@ public class CreateEventWeeklyHandler {
         .privacyLevel(2)
         .build();
       list.add(dto);
+      return list;
     }
     return list;
   }

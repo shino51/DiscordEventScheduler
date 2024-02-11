@@ -1,6 +1,6 @@
 package org.shino.handler;
 
-import org.shino.repository.model.dto.DiscordEventDTO;
+import org.shino.model.dto.DiscordEventDTO;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

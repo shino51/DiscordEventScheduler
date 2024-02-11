@@ -1,4 +1,4 @@
-package org.shino.repository.model;
+package org.shino.model;
 
 import lombok.Getter;
 

@@ -4,28 +4,28 @@ package org.shino.spring.configuration;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootConfiguration
+@PropertySource("classpath:discord.properties")
 public class Configuration {
 
   @Bean
   public RestTemplate restTemplate(RestTemplateBuilder builder) {
-    return builder.build();
+    RestTemplate restTemplate = builder.build();
+//    List<HttpMessageConverter<?>> converters = new ArrayList<>();
+//    converters.add(new StringHttpMessageConverter());
+//    converters.add(new GsonHttpMessageConverter());
+//    restTemplate.setMessageConverters(converters);
+
+    return restTemplate;
   }
 
-  @Bean
-  public DataSource dataSource() {
-
-    // no need shutdown, EmbeddedDatabaseFactoryBean will take care of this
-    return new EmbeddedDatabaseBuilder()
-      .setType(EmbeddedDatabaseType.HSQL)
-      .addScripts("db/schema.sql", "db/data.sql")
-      .setName("discord")
-      .build();
-  }
 }

@@ -1,4 +1,4 @@
-package org.shino.repository.model.vo;
+package org.shino.model.vo;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.shino.repository.model.dto.EventVO;
+import org.shino.model.dto.EventVO;
 
 import java.io.Serial;
 import java.io.Serializable;
