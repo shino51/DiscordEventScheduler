@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.shino.model.dto.EventVO;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,7 +18,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class CreateEventVO extends EventVO implements Serializable {
+public class CreateEventVO implements Serializable {
 
   @Serial
   private static final long serialVersionUID = 4527620175417116352L;

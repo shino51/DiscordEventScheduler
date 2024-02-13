@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class DiscordEventDTO extends EventDTO implements Serializable {
+public class DiscordEventDTO implements Serializable {
 
   @Serial
   private static final long serialVersionUID = -7273298766068248007L;

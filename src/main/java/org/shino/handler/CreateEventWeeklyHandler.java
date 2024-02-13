@@ -14,7 +14,6 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.time.DayOfWeek.SUNDAY;
 import static java.time.temporal.TemporalAdjusters.next;
 
 @Component
@@ -30,7 +29,7 @@ public class CreateEventWeeklyHandler {
     String tailedUrl = "scheduled-events";
 
     List<CreateEventDTO> dtoList = convertToDTO(eventVO);
-    for (CreateEventDTO dto: dtoList) {
+    for (CreateEventDTO dto : dtoList) {
       output.add(dispatcher.postRequest(tailedUrl, dto));
     }
     return output;
@@ -39,28 +38,33 @@ public class CreateEventWeeklyHandler {
   private List<CreateEventDTO> convertToDTO(CreateEventVO vo) {
     List<CreateEventDTO> list = new ArrayList<>();
 
-    List<Event> events = repository.findByFrequency(Frequency.EVERY_SUNDAY);
+    List<Event> events = repository.findByFrequency(Frequency.WEEKLY);
     // get how many weeks in this month
     LocalDate firstDayOfMonth = vo.getFirstDayOfMonth();
+    // create event only within the month. This is used to terminate the event creation
+    LocalDateTime firstDayOfNextMonth = firstDayOfMonth.atTime(0,0).plusMonths(1);
 
-    for (Event event: events) {
-      LocalDate day = firstDayOfMonth.with(next(SUNDAY));
-
-      LocalDateTime jpnDateTime = day.atTime(event.getStartTime(), 0);
-
-      ZonedDateTime zonedDateTime = ZonedDateTime.of(jpnDateTime, ZoneId.of(event.getTimeZone(), ZoneId.SHORT_IDS));
+    for (Event event : events) {
+      DayOfWeek eventDay = event.getDayOfWeek();
+      LocalDate eventDate = firstDayOfMonth.getDayOfWeek().equals(eventDay) ? firstDayOfMonth : firstDayOfMonth.with(next(eventDay));
+      LocalTime startTime = LocalTime.of(event.getStartTime(), 0);
+      ZonedDateTime zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(event.getTimeZone(), ZoneId.SHORT_IDS));
       LocalDateTime utcDateTime = LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
-
-      CreateEventDTO dto = CreateEventDTO.builder()
-        .channelId(event.getChannelId())
-        .name(event.getName())
-        .description(event.getDescription())
-        .scheduledStartTime(utcDateTime)
-        .entityType(2)
-        .privacyLevel(2)
-        .build();
-      list.add(dto);
-      return list;
+      do {
+        CreateEventDTO dto = CreateEventDTO.builder()
+          .channelId(event.getChannelId())
+          .name(event.getName())
+          .description(event.getDescription())
+          .scheduledStartTime(utcDateTime)
+          .entityType(2)
+          .privacyLevel(2)
+          .build();
+        list.add(dto);
+        // shift to next event date
+        eventDate = eventDate.plusWeeks(1);
+        zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(event.getTimeZone(), ZoneId.SHORT_IDS));
+        utcDateTime = LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
+      } while (utcDateTime.isBefore(firstDayOfNextMonth));
     }
     return list;
   }

@@ -1,10 +1,7 @@
 package org.shino.handler.dispatcher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import org.shino.model.Event;
+import org.shino.model.dto.CreateEventDTO;
 import org.shino.model.dto.DiscordEventDTO;
-import org.shino.model.dto.EventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -45,19 +42,10 @@ public class DiscordEventDispatcher {
     return response.getBody();
   }
 
-  public DiscordEventDTO postRequest(String tailedUrl, EventDTO body) {
+  public DiscordEventDTO postRequest(String tailedUrl, CreateEventDTO body) {
     String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-    String formattedBody = "";
-    try {
-      formattedBody = objectMapper.writeValueAsString(body);
-      formattedBody = formattedBody.replaceAll("\\\\n", "\\n");
-    } catch (Exception ex) {
-      return null;
-    }
-    HttpEntity<String> requestEntity = new HttpEntity<>(formattedBody, createHeader());
+    HttpEntity<CreateEventDTO> requestEntity = new HttpEntity<>(body, createHeader());
     ResponseEntity<DiscordEventDTO> response = restTemplate.postForEntity(
       url,
       requestEntity,
@@ -65,7 +53,6 @@ public class DiscordEventDispatcher {
     );
     return response.getBody();
   }
-
 
   private HttpHeaders createHeader() {
     HttpHeaders headers = new HttpHeaders();

@@ -1,6 +1,4 @@
 USE discord;
 
-INSERT INTO EVENT (ID, NAME, GUILD_ID, CHANNEL_ID, FREQUENCY, START_TIME, TIME_ZONE, DESCRIPTION) VALUES
-(default, '【A1A2】日曜勉強会', '871986887328407604', '871986887663968310', 'EVERY_SUNDAY', 21, 'JST', '所要時間50分。\n日本時間21時から、定例日曜勉強会やります！\n適正レベルはA2まで、使用教材は以下チャンネルに投稿しておきます。\nhttps://discord.com/channels/871986887328407604/871987389638254612\n喋らず、見ているだけのご参加も歓迎します。まずはお気軽に覗きに来てください😊'),
-(default, '【B1】日曜勉強会', '871986887328407604', '872830871856627712', 'EVERY_SUNDAY', 22, 'JST', '所要時間50分。\n日本時間21時から、定例日曜勉強会やります！\n適正レベルはA2まで、使用教材は以下チャンネルに投稿しておきます。\nhttps://discord.com/channels/871986887328407604/871987389638254612\n喋らず、見ているだけのご参加も歓迎します。まずはお気軽に覗きに来てください😊'),
-(default, '【B2】日曜勉強会', '871986887328407604', '1184550037531926538', 'EVERY_SUNDAY', 23, 'JST', '所要時間50分。\n日本時間23時から、定例日曜勉強会やります！\n適正レベルはB2くらい、使用教材は以下チャンネルに投稿しておきます。\nhttps://discord.com/channels/871986887328407604/1183159826767937688\n喋らず、見ているだけのご参加も歓迎します。まずはお気軽に覗きに来てください😊');
+INSERT INTO EVENT (ID, NAME, GUILD_ID, CHANNEL_ID, FREQUENCY, DAY_OF_WEEK, START_TIME, TIME_ZONE, DESCRIPTION) VALUES
+('日曜勉強会', '123456', '565455', 'WEEKLY', 'SUNDAY', 21, 'JST', 'Test Description');
