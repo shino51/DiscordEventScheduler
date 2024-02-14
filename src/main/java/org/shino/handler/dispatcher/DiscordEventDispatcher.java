@@ -1,6 +1,5 @@
 package org.shino.handler.dispatcher;
 
-import org.shino.model.dto.CreateEventDTO;
 import org.shino.model.dto.DiscordEventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,10 +41,10 @@ public class DiscordEventDispatcher {
     return response.getBody();
   }
 
-  public DiscordEventDTO postRequest(String tailedUrl, CreateEventDTO body) {
+  public DiscordEventDTO postRequest(String tailedUrl, DiscordEventDTO body) {
     String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
 
-    HttpEntity<CreateEventDTO> requestEntity = new HttpEntity<>(body, createHeader());
+    HttpEntity<DiscordEventDTO> requestEntity = new HttpEntity<>(body, createHeader());
     ResponseEntity<DiscordEventDTO> response = restTemplate.postForEntity(
       url,
       requestEntity,

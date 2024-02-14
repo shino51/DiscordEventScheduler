@@ -10,7 +10,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
 import org.shino.model.Event;
 import org.shino.model.Frequency;
-import org.shino.model.dto.CreateEventDTO;
 import org.shino.model.dto.DiscordEventDTO;
 import org.shino.model.vo.CreateEventVO;
 import org.shino.repository.EventRepository;
@@ -41,7 +40,7 @@ public class CreateEventWeeklyHandlerTest {
   private static final String EUROPE_PARIS_TIMEZONE = "ECT";
 
   @Captor
-  ArgumentCaptor<CreateEventDTO> argumentCaptor = ArgumentCaptor.forClass(CreateEventDTO.class);
+  ArgumentCaptor<DiscordEventDTO> argumentCaptor = ArgumentCaptor.forClass(DiscordEventDTO.class);
 
   @Mock
   private DiscordEventDispatcher dispatcher;
@@ -57,7 +56,7 @@ public class CreateEventWeeklyHandlerTest {
     // initiate mock's behaviour
     List<Event> events = Collections.singletonList(sundayEvent(JAPAN_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(CreateEventDTO.class))).thenReturn(createDiscordEventDTO());
+    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createDiscordEventDTO());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
     List<DiscordEventDTO> result = createEventWeeklyHandler.run(vo);
@@ -67,10 +66,10 @@ public class CreateEventWeeklyHandlerTest {
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
-    List<CreateEventDTO> createEventDTOList = argumentCaptor.getAllValues();
+    List<DiscordEventDTO> createEventDTOList = argumentCaptor.getAllValues();
 
     // validate contents of the first dto
-    CreateEventDTO firstCreatedDTO = createEventDTOList.get(0);
+    var firstCreatedDTO = createEventDTOList.get(0);
     assertThat(firstCreatedDTO.getChannelId()).isEqualTo(CHANNEL_ID);
     assertThat(firstCreatedDTO.getDescription()).isEqualTo(DESCRIPTION);
     assertThat(firstCreatedDTO.getName()).isEqualTo(NAME);
@@ -89,14 +88,14 @@ public class CreateEventWeeklyHandlerTest {
     // initiate mock's behaviour
     List<Event> events = Collections.singletonList(sundayEvent(EUROPE_PARIS_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(CreateEventDTO.class))).thenReturn(createDiscordEventDTO());
+    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createDiscordEventDTO());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
     createEventWeeklyHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
-    List<CreateEventDTO> createEventDTOList = argumentCaptor.getAllValues();
+    var createEventDTOList = argumentCaptor.getAllValues();
     // -1 hours offset
     assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-03-03T20:00:00");
     assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-10T20:00:00");
@@ -111,14 +110,14 @@ public class CreateEventWeeklyHandlerTest {
     // initiate mock's behaviour
     List<Event> events = Collections.singletonList(sundayEvent(JAPAN_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(CreateEventDTO.class))).thenReturn(createDiscordEventDTO());
+    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createDiscordEventDTO());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_SUMMER_TIME);
     createEventWeeklyHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
-    List<CreateEventDTO> createEventDTOList = argumentCaptor.getAllValues();
+    var createEventDTOList = argumentCaptor.getAllValues();
     // +9 hours offset
     assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-06-02T12:00:00");
     assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-06-09T12:00:00");
@@ -133,14 +132,14 @@ public class CreateEventWeeklyHandlerTest {
     // initiate mock's behaviour
     List<Event> events = Collections.singletonList(sundayEvent(EUROPE_PARIS_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(CreateEventDTO.class))).thenReturn(createDiscordEventDTO());
+    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createDiscordEventDTO());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_SUMMER_TIME);
     createEventWeeklyHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
-    List<CreateEventDTO> createEventDTOList = argumentCaptor.getAllValues();
+    var createEventDTOList = argumentCaptor.getAllValues();
 
     // -2 hours offset
     assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-06-02T19:00:00");
@@ -155,7 +154,7 @@ public class CreateEventWeeklyHandlerTest {
     // initiate mock's behaviour
     List<Event> events = Collections.singletonList(sundayEvent(EUROPE_PARIS_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(CreateEventDTO.class))).thenReturn(createDiscordEventDTO());
+    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createDiscordEventDTO());
 
     // on 1.9.2024, it is the first day of the month and is sunday
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_SUNDAY);
@@ -163,7 +162,7 @@ public class CreateEventWeeklyHandlerTest {
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
-    List<CreateEventDTO> createEventDTOList = argumentCaptor.getAllValues();
+    var createEventDTOList = argumentCaptor.getAllValues();
 
     // The date should be 1.9.2024 as this day is sunday
     assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-09-01T19:00:00");

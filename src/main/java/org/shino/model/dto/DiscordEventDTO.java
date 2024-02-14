@@ -10,8 +10,9 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Builder
 @AllArgsConstructor
@@ -30,9 +31,24 @@ public class DiscordEventDTO implements Serializable {
   private String channelId;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-  private Date scheduledStartTime;
+  private LocalDateTime scheduledStartTime;
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-  private Date scheduledEndTime;
+  private LocalDateTime scheduledEndTime;
   private int status;
   private List<String> guildScheduledEventExceptions;
+  private int entityType;
+  private int privacyLevel;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DiscordEventDTO that = (DiscordEventDTO) o;
+    return name.equals(that.name) && channelId.equals(that.channelId) && scheduledStartTime.equals(that.scheduledStartTime);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, channelId, scheduledStartTime);
+  }
 }

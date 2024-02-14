@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
 import org.shino.model.Event;
 import org.shino.model.Frequency;
-import org.shino.model.dto.CreateEventDTO;
 import org.shino.model.dto.DiscordEventDTO;
-import org.shino.repository.EventRepository;
 import org.shino.model.vo.CreateEventVO;
+import org.shino.repository.EventRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.*;
@@ -28,21 +27,21 @@ public class CreateEventWeeklyHandler {
     List<DiscordEventDTO> output = new ArrayList<>();
     String tailedUrl = "scheduled-events";
 
-    List<CreateEventDTO> dtoList = convertToDTO(eventVO);
-    for (CreateEventDTO dto : dtoList) {
+    List<DiscordEventDTO> dtoList = convertToDTO(eventVO);
+    for (DiscordEventDTO dto : dtoList) {
       output.add(dispatcher.postRequest(tailedUrl, dto));
     }
     return output;
   }
 
-  private List<CreateEventDTO> convertToDTO(CreateEventVO vo) {
-    List<CreateEventDTO> list = new ArrayList<>();
+  private List<DiscordEventDTO> convertToDTO(CreateEventVO vo) {
+    List<DiscordEventDTO> list = new ArrayList<>();
 
     List<Event> events = repository.findByFrequency(Frequency.WEEKLY);
     // get how many weeks in this month
     LocalDate firstDayOfMonth = vo.getFirstDayOfMonth();
     // create event only within the month. This is used to terminate the event creation
-    LocalDateTime firstDayOfNextMonth = firstDayOfMonth.atTime(0,0).plusMonths(1);
+    LocalDateTime firstDayOfNextMonth = firstDayOfMonth.atTime(0, 0).plusMonths(1);
 
     for (Event event : events) {
       DayOfWeek eventDay = event.getDayOfWeek();
@@ -51,7 +50,7 @@ public class CreateEventWeeklyHandler {
       ZonedDateTime zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(event.getTimeZone(), ZoneId.SHORT_IDS));
       LocalDateTime utcDateTime = LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
       do {
-        CreateEventDTO dto = CreateEventDTO.builder()
+        var dto = DiscordEventDTO.builder()
           .channelId(event.getChannelId())
           .name(event.getName())
           .description(event.getDescription())
