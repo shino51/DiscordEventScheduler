@@ -18,13 +18,13 @@ import java.util.List;
 public class DiscordEventDispatcher {
 
   @Value("${auth.token}")
-  private final String authToken;
+  private String authToken;
 
   @Value("${discord.api.url}")
-  private final String discordApiUrl;
+  private String discordApiUrl;
 
   @Value("${guild.id}")
-  private final String guildId;
+  private String guildId;
 
   private final RestTemplate restTemplate;
 

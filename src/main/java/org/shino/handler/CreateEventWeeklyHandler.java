@@ -43,14 +43,14 @@ public class CreateEventWeeklyHandler {
     // get how many weeks in this month
     LocalDate firstDayOfMonth = vo.getFirstDayOfMonth();
     // create event only within the month. This is used to terminate the event creation
-    LocalDateTime firstDayOfNextMonth = firstDayOfMonth.atTime(0, 0).plusMonths(1);
+    ZonedDateTime firstDayOfNextMonth = getUtcLocalDateTime("UTC", firstDayOfMonth.plusMonths(1), LocalTime.of(0, 0));
 
     for (Event event : events) {
       DayOfWeek eventDay = event.getDayOfWeek();
       LocalDate eventDate = firstDayOfMonth.getDayOfWeek().equals(eventDay) ? firstDayOfMonth : firstDayOfMonth.with(next(eventDay));
       LocalTime startTime = LocalTime.of(event.getStartTime(), 0);
 
-      LocalDateTime utcDateTime = getUtcLocalDateTime(event.getTimeZone(), eventDate, startTime);
+      ZonedDateTime utcDateTime = getUtcLocalDateTime(event.getTimeZone(), eventDate, startTime);
       do {
         var dto = createDTOByEvent(event, utcDateTime);
         if (!existingEvents.contains(dto)) {
@@ -64,12 +64,12 @@ public class CreateEventWeeklyHandler {
     return list;
   }
 
-  private LocalDateTime getUtcLocalDateTime(String timeZoneShortId, LocalDate eventDate, LocalTime startTime) {
-    ZonedDateTime zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(timeZoneShortId, ZoneId.SHORT_IDS));
-    return LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
+  private ZonedDateTime getUtcLocalDateTime(String timeZoneShortId, LocalDate eventDate, LocalTime startTime) {
+    return ZonedDateTime.of(eventDate, startTime, ZoneId.of(timeZoneShortId, ZoneId.SHORT_IDS))
+      .withZoneSameInstant(ZoneOffset.UTC);
   }
 
-  private DiscordEventDTO createDTOByEvent(Event event, LocalDateTime utcDateTime) {
+  private DiscordEventDTO createDTOByEvent(Event event, ZonedDateTime utcDateTime) {
     return DiscordEventDTO.builder()
       .channelId(event.getChannelId())
       .name(event.getName())

@@ -19,7 +19,7 @@ public class DiscordEventController {
   private final DiscordEventService service;
 
   @Value("${discord.api.url}")
-  private final String discordApiUrl;
+  private String discordApiUrl;
 
   @GetMapping("/version")
   public String getVersion() {
