@@ -44,11 +44,11 @@ public class DiscordEventDTO implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     DiscordEventDTO that = (DiscordEventDTO) o;
-    return name.equals(that.name) && channelId.equals(that.channelId) && scheduledStartTime.equals(that.scheduledStartTime);
+    return channelId.equals(that.channelId) && scheduledStartTime.equals(that.scheduledStartTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, channelId, scheduledStartTime);
+    return Objects.hash(channelId, scheduledStartTime);
   }
 }

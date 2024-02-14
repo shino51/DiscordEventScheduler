@@ -1,9 +1,9 @@
 package org.shino.controller;
 
-import org.shino.service.DiscordEventService;
-import org.shino.model.vo.CreateEventVO;
+import lombok.RequiredArgsConstructor;
 import org.shino.model.dto.DiscordEventDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.shino.model.vo.CreateEventVO;
+import org.shino.service.DiscordEventService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/scheduler")
+@RequiredArgsConstructor
 public class DiscordEventController {
 
-  @Autowired
-  private DiscordEventService service;
+  private final DiscordEventService service;
 
   @Value("${discord.api.url}")
-  private String discordApiUrl;
+  private final String discordApiUrl;
 
   @GetMapping("/version")
   public String getVersion() {

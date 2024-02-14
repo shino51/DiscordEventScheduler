@@ -1,7 +1,7 @@
 package org.shino.handler.dispatcher;
 
+import lombok.RequiredArgsConstructor;
 import org.shino.model.dto.DiscordEventDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -14,19 +14,19 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class DiscordEventDispatcher {
 
   @Value("${auth.token}")
-  private String authToken;
+  private final String authToken;
 
   @Value("${discord.api.url}")
-  private String discordApiUrl;
+  private final String discordApiUrl;
 
   @Value("${guild.id}")
-  private String guildId;
+  private final String guildId;
 
-  @Autowired
-  private RestTemplate restTemplate;
+  private final RestTemplate restTemplate;
 
   public List<DiscordEventDTO> getRequest(String tailedUrl) {
     String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;

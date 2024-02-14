@@ -1,22 +1,20 @@
 package org.shino.service;
 
+import lombok.RequiredArgsConstructor;
 import org.shino.handler.CreateEventWeeklyHandler;
 import org.shino.handler.GetScheduledEventsHandler;
-import org.shino.model.vo.CreateEventVO;
 import org.shino.model.dto.DiscordEventDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.shino.model.vo.CreateEventVO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DiscordEventService {
 
-  @Autowired
-  private CreateEventWeeklyHandler createEventWeeklyHandler;
-
-  @Autowired
-  private GetScheduledEventsHandler getScheduledEventsHandler;
+  private final CreateEventWeeklyHandler createEventWeeklyHandler;
+  private final GetScheduledEventsHandler getScheduledEventsHandler;
 
   public List<DiscordEventDTO> getListOfScheduledEvents() {
     return getScheduledEventsHandler.run();

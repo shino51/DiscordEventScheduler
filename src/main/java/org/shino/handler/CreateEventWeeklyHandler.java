@@ -21,20 +21,22 @@ public class CreateEventWeeklyHandler {
 
   private final EventRepository repository;
   private final DiscordEventDispatcher dispatcher;
+  private final GetScheduledEventsHandler getScheduledEventsHandler;
 
   public List<DiscordEventDTO> run(CreateEventVO eventVO) {
 
     List<DiscordEventDTO> output = new ArrayList<>();
     String tailedUrl = "scheduled-events";
 
-    List<DiscordEventDTO> dtoList = convertToDTO(eventVO);
+    List<DiscordEventDTO> existingEvents = getScheduledEventsHandler.run();
+    List<DiscordEventDTO> dtoList = convertToDTO(eventVO, existingEvents);
     for (DiscordEventDTO dto : dtoList) {
       output.add(dispatcher.postRequest(tailedUrl, dto));
     }
     return output;
   }
 
-  private List<DiscordEventDTO> convertToDTO(CreateEventVO vo) {
+  private List<DiscordEventDTO> convertToDTO(CreateEventVO vo, List<DiscordEventDTO> existingEvents) {
     List<DiscordEventDTO> list = new ArrayList<>();
 
     List<Event> events = repository.findByFrequency(Frequency.WEEKLY);
@@ -47,24 +49,34 @@ public class CreateEventWeeklyHandler {
       DayOfWeek eventDay = event.getDayOfWeek();
       LocalDate eventDate = firstDayOfMonth.getDayOfWeek().equals(eventDay) ? firstDayOfMonth : firstDayOfMonth.with(next(eventDay));
       LocalTime startTime = LocalTime.of(event.getStartTime(), 0);
-      ZonedDateTime zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(event.getTimeZone(), ZoneId.SHORT_IDS));
-      LocalDateTime utcDateTime = LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
+
+      LocalDateTime utcDateTime = getUtcLocalDateTime(event.getTimeZone(), eventDate, startTime);
       do {
-        var dto = DiscordEventDTO.builder()
-          .channelId(event.getChannelId())
-          .name(event.getName())
-          .description(event.getDescription())
-          .scheduledStartTime(utcDateTime)
-          .entityType(2)
-          .privacyLevel(2)
-          .build();
-        list.add(dto);
+        var dto = createDTOByEvent(event, utcDateTime);
+        if (!existingEvents.contains(dto)) {
+          list.add(dto);
+        }
         // shift to next event date
         eventDate = eventDate.plusWeeks(1);
-        zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(event.getTimeZone(), ZoneId.SHORT_IDS));
-        utcDateTime = LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
+        utcDateTime = getUtcLocalDateTime(event.getTimeZone(), eventDate, startTime);
       } while (utcDateTime.isBefore(firstDayOfNextMonth));
     }
     return list;
+  }
+
+  private LocalDateTime getUtcLocalDateTime(String timeZoneShortId, LocalDate eventDate, LocalTime startTime) {
+    ZonedDateTime zonedDateTime = ZonedDateTime.of(eventDate, startTime, ZoneId.of(timeZoneShortId, ZoneId.SHORT_IDS));
+    return LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
+  }
+
+  private DiscordEventDTO createDTOByEvent(Event event, LocalDateTime utcDateTime) {
+    return DiscordEventDTO.builder()
+      .channelId(event.getChannelId())
+      .name(event.getName())
+      .description(event.getDescription())
+      .scheduledStartTime(utcDateTime)
+      .entityType(2)
+      .privacyLevel(2)
+      .build();
   }
 }
