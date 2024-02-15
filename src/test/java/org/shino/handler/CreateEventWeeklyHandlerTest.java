@@ -14,9 +14,7 @@ import org.shino.model.dto.DiscordEventDTO;
 import org.shino.model.vo.CreateEventVO;
 import org.shino.repository.EventRepository;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -81,13 +79,13 @@ public class CreateEventWeeklyHandlerTest {
     assertThat(firstCreatedDTO.getDescription()).isEqualTo(DESCRIPTION);
     assertThat(firstCreatedDTO.getName()).isEqualTo(NAME);
     // The first sunday in March 2024 is 3.3 and JST 21:00 is UTC 12:00
-    assertThat(firstCreatedDTO.getScheduledStartTime()).isEqualTo("2024-03-03T12:00:00");
+    assertThat(firstCreatedDTO.getScheduledStartTime()).isEqualTo("2024-03-03T12:00Z");
 
     // validate event dates for the rest of dtos
-    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-10T12:00:00");
-    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-03-17T12:00:00");
-    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-24T12:00:00");
-    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-03-31T12:00:00");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-10T12:00Z");
+    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-03-17T12:00Z");
+    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-24T12:00Z");
+    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-03-31T12:00Z");
   }
 
   @Test
@@ -105,12 +103,12 @@ public class CreateEventWeeklyHandlerTest {
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
     var createEventDTOList = argumentCaptor.getAllValues();
     // -1 hours offset
-    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-03-03T20:00:00");
-    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-10T20:00:00");
-    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-03-17T20:00:00");
-    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-24T20:00:00");
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-03-03T20:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-10T20:00Z");
+    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-03-17T20:00Z");
+    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-24T20:00Z");
     // on the last day is the end of winter time. From this day, offset is -2 instead of -1
-    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-03-31T19:00:00");
+    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-03-31T19:00Z");
   }
 
   @Test
@@ -128,11 +126,11 @@ public class CreateEventWeeklyHandlerTest {
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
     var createEventDTOList = argumentCaptor.getAllValues();
     // +9 hours offset
-    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-06-02T12:00:00");
-    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-06-09T12:00:00");
-    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-06-16T12:00:00");
-    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-06-23T12:00:00");
-    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-06-30T12:00:00");
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-06-02T12:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-06-09T12:00Z");
+    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-06-16T12:00Z");
+    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-06-23T12:00Z");
+    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-06-30T12:00Z");
   }
 
   @Test
@@ -151,11 +149,11 @@ public class CreateEventWeeklyHandlerTest {
     var createEventDTOList = argumentCaptor.getAllValues();
 
     // -2 hours offset
-    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-06-02T19:00:00");
-    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-06-09T19:00:00");
-    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-06-16T19:00:00");
-    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-06-23T19:00:00");
-    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-06-30T19:00:00");
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-06-02T19:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-06-09T19:00Z");
+    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-06-16T19:00Z");
+    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-06-23T19:00Z");
+    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-06-30T19:00Z");
   }
 
   @Test
@@ -175,11 +173,11 @@ public class CreateEventWeeklyHandlerTest {
     var createEventDTOList = argumentCaptor.getAllValues();
 
     // The date should be 1.9.2024 as this day is sunday
-    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-09-01T19:00:00");
-    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-09-08T19:00:00");
-    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-09-15T19:00:00");
-    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-09-22T19:00:00");
-    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-09-29T19:00:00");
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-09-01T19:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-09-08T19:00Z");
+    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-09-15T19:00Z");
+    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-09-22T19:00Z");
+    assertThat(createEventDTOList.get(4).getScheduledStartTime()).isEqualTo("2024-09-29T19:00Z");
   }
 
   @Test
@@ -207,7 +205,12 @@ public class CreateEventWeeklyHandlerTest {
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
     when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
     // duplicated event should be found
-    when(getScheduledEventsHandler.run()).thenReturn(Collections.singletonList(createResponse(LocalDateTime.of(2024, 3, 3, 12, 0))));
+    when(getScheduledEventsHandler.run())
+      .thenReturn(Collections.singletonList(
+        createResponse(
+          getUtcLocalDateTime(LocalDate.of(2024,3,3), LocalTime.of(12,0)))
+        )
+      );
 
     // on 1.9.2024, it is the first day of the month and is sunday
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
@@ -220,10 +223,10 @@ public class CreateEventWeeklyHandlerTest {
 
     // validate event dates for the rest of dtos
     // The create with the date of UTC 2024.3.3 12:00 is eliminated
-    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-03-10T12:00:00");
-    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-17T12:00:00");
-    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-03-24T12:00:00");
-    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-31T12:00:00");
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-03-10T12:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-17T12:00Z");
+    assertThat(createEventDTOList.get(2).getScheduledStartTime()).isEqualTo("2024-03-24T12:00Z");
+    assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-31T12:00Z");
   }
 
   private CreateEventVO createEventVO(LocalDate firstDayOfMonth) {
@@ -250,10 +253,12 @@ public class CreateEventWeeklyHandlerTest {
   }
 
   private DiscordEventDTO createResponse() {
-    return createResponse(LocalDateTime.of(2024, 3, 3, 12, 0));
+    return createResponse(
+      getUtcLocalDateTime(LocalDate.of(2024, 3, 3), LocalTime.of(12,0))
+    );
   }
 
-  private DiscordEventDTO createResponse(LocalDateTime startTime) {
+  private DiscordEventDTO createResponse(ZonedDateTime startTime) {
     return DiscordEventDTO.builder()
       .channelId(CHANNEL_ID)
       .name(NAME)
@@ -262,4 +267,8 @@ public class CreateEventWeeklyHandlerTest {
       .build();
   }
 
+  private ZonedDateTime getUtcLocalDateTime(LocalDate eventDate, LocalTime startTime) {
+    return ZonedDateTime.of(eventDate, startTime, ZoneId.of("UTC", ZoneId.SHORT_IDS))
+      .withZoneSameInstant(ZoneOffset.UTC);
+  }
 }

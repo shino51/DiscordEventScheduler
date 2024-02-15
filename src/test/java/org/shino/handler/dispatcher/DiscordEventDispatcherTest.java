@@ -2,13 +2,17 @@ package org.shino.handler.dispatcher;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.shino.model.dto.DiscordEventDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -18,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +53,7 @@ public class DiscordEventDispatcherTest {
     String tailedUrl = "scheduled-events";
     String expectedUrl = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
 
-    DiscordEventDTO responseBody = createDiscordEventDTO();
+    DiscordEventDTO responseBody = createResponseDTO();
 
     ResponseEntity<DiscordEventDTO> response = new ResponseEntity<>(responseBody, HttpStatus.ACCEPTED);
     when(restTemplate.postForEntity(eq(expectedUrl), any(HttpEntity.class), eq(DiscordEventDTO.class)))
@@ -58,11 +64,31 @@ public class DiscordEventDispatcherTest {
     assertThat(result).isEqualTo(responseBody);
   }
 
+  @Test
+  public void testGetRequest() {
+    String tailedUrl = "scheduled-events";
+    String expectedUrl = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
+
+    var responseBody = Collections.singletonList(createResponseDTO());
+    ResponseEntity<List<DiscordEventDTO>> response = new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+    when(restTemplate.exchange(
+      eq(expectedUrl),
+      eq(HttpMethod.GET),
+      any(HttpEntity.class),
+      any(ParameterizedTypeReference.class)))
+      .thenReturn(response);
+
+    List<DiscordEventDTO> result = eventDispatcher.getRequest(tailedUrl);
+
+    assertThat(result).isEqualTo(responseBody);
+  }
+
+
   private DiscordEventDTO createEventDTO() {
 
     LocalDateTime jpnDateTime = LocalDateTime.parse("2025-02-10T21:00:00");
-    ZonedDateTime zonedDateTime = ZonedDateTime.of(jpnDateTime, ZoneId.of("JST", ZoneId.SHORT_IDS));
-    LocalDateTime utcDateTime = LocalDateTime.ofInstant(zonedDateTime.toInstant(), ZoneOffset.UTC);
+    ZonedDateTime utcDateTime = ZonedDateTime.of(jpnDateTime, ZoneId.of("JST", ZoneId.SHORT_IDS)).withZoneSameInstant(ZoneOffset.UTC);
 
     return DiscordEventDTO.builder()
       .channelId("1041441815854854184")
@@ -72,10 +98,10 @@ public class DiscordEventDispatcherTest {
       .build();
   }
 
-  private DiscordEventDTO createDiscordEventDTO() {
+  private DiscordEventDTO createResponseDTO() {
     return DiscordEventDTO.builder()
-      .id("1193598348742115329")
-      .channelId("1041441815854854184")
+      .id("11111111222222")
+      .channelId("1055555555555")
       .guildId(guildId).build();
   }
 }
