@@ -11,4 +11,5 @@ import java.util.List;
 public interface EventRepository extends CrudRepository<Event, Integer> {
 
   List<Event> findByFrequency(Frequency frequency);
+  List<Event> findByFrequencyIn(Frequency... frequencyArray);
 }

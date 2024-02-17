@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class DiscordEventDispatcher {
 
+  private final RestTemplate restTemplate;
+
   @Value("${auth.token}")
   private String authToken;
 
@@ -32,12 +34,8 @@ public class DiscordEventDispatcher {
   @Value("${guild.id}")
   private String guildId;
 
-  private final String baseURL = discordApiUrl + "/guilds/" + guildId + "/";
-
-  private final RestTemplate restTemplate;
-
   public List<DiscordEventDTO> getRequest(String tailedUrl) {
-    String url = baseURL + tailedUrl;
+    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
 
     ResponseEntity<List<DiscordEventDTO>> response = restTemplate.exchange(
       url,
@@ -50,7 +48,7 @@ public class DiscordEventDispatcher {
   }
 
   public DiscordEventDTO postRequest(String tailedUrl, DiscordEventDTO body) {
-    String url = baseURL + tailedUrl;
+    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
 
     HttpEntity<DiscordEventDTO> requestEntity = new HttpEntity<>(body, createHeader());
     try {
@@ -80,10 +78,9 @@ public class DiscordEventDispatcher {
     }
   }
 
-  public String deleteRequest(String tailedUrl) {
+  public void deleteRequest(String tailedUrl) {
     String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
-    restTemplate.delete(url);
-    return "Delete Request has successfully been completed. URL: " + url;
+    restTemplate.exchange(url, HttpMethod.DELETE, new HttpEntity<>(createHeader()), String.class);
   }
 
   private HttpHeaders createHeader() {

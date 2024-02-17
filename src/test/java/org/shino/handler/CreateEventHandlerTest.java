@@ -1,5 +1,6 @@
 package org.shino.handler;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -25,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CreateEventWeeklyHandlerTest {
+public class CreateEventHandlerTest {
 
   private static final String CHANNEL_ID = "123456";
   private static final String GUILD_ID = "545655";
@@ -53,18 +54,23 @@ public class CreateEventWeeklyHandlerTest {
   private GetScheduledEventsHandler getScheduledEventsHandler;
 
   @InjectMocks
-  private CreateEventWeeklyHandler createEventWeeklyHandler;
+  private CreateEventHandler createEventHandler;
+
+  @Before
+  public void setUp() {
+    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+  }
 
   @Test
   public void testCreateWeeklyEventInJpWinterTime() {
     // define mock's behaviour
-    List<Event> events = Collections.singletonList(createEvent(JAPAN_TIMEZONE));
+    List<Event> events = Collections.singletonList(createWeeklyEvent(JAPAN_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
     when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
-    List<DiscordEventDTO> result = createEventWeeklyHandler.run(vo);
+    List<DiscordEventDTO> result = createEventHandler.run(vo);
 
     // discord event DTO gets created
     assertThat(result).isNotNull().hasSize(5);
@@ -91,13 +97,13 @@ public class CreateEventWeeklyHandlerTest {
   @Test
   public void createWeeklyEventForEuropeInWinterTime() {
     // define mock's behaviour
-    List<Event> events = Collections.singletonList(createEvent(EUROPE_PARIS_TIMEZONE));
+    List<Event> events = Collections.singletonList(createWeeklyEvent(EUROPE_PARIS_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
     when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
-    createEventWeeklyHandler.run(vo);
+    createEventHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
@@ -114,13 +120,13 @@ public class CreateEventWeeklyHandlerTest {
   @Test
   public void createWeeklyEventForJapanInSummerTime() {
     // define mock's behaviour
-    List<Event> events = Collections.singletonList(createEvent(JAPAN_TIMEZONE));
+    List<Event> events = Collections.singletonList(createWeeklyEvent(JAPAN_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
     when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_SUMMER_TIME);
-    createEventWeeklyHandler.run(vo);
+    createEventHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
@@ -136,13 +142,13 @@ public class CreateEventWeeklyHandlerTest {
   @Test
   public void createWeeklyEventForEuropeInSummerTime() {
     // define mock's behaviour
-    List<Event> events = Collections.singletonList(createEvent(EUROPE_PARIS_TIMEZONE));
+    List<Event> events = Collections.singletonList(createWeeklyEvent(EUROPE_PARIS_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
     when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
 
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_SUMMER_TIME);
-    createEventWeeklyHandler.run(vo);
+    createEventHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
@@ -159,14 +165,14 @@ public class CreateEventWeeklyHandlerTest {
   @Test
   public void createWeeklyEventWhenFirstDayIsSunday() {
     // define mock's behaviour
-    List<Event> events = Collections.singletonList(createEvent(EUROPE_PARIS_TIMEZONE));
+    List<Event> events = Collections.singletonList(createWeeklyEvent(EUROPE_PARIS_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
     when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
 
     // on 1.9.2024, it is the first day of the month and is sunday
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_SUNDAY);
-    createEventWeeklyHandler.run(vo);
+    createEventHandler.run(vo);
 
     // verify argument passed
     verify(dispatcher, times(5)).postRequest(anyString(), argumentCaptor.capture());
@@ -183,16 +189,16 @@ public class CreateEventWeeklyHandlerTest {
   @Test
   public void createMultipleEventWithDifferentDayOfWeek() {
     // define mock's behaviour
-    List<Event> events = Arrays.asList(createEvent(EUROPE_PARIS_TIMEZONE, DayOfWeek.SUNDAY, DEFAULT_START_TIME),
-      createEvent(EUROPE_PARIS_TIMEZONE, DayOfWeek.FRIDAY, DEFAULT_START_TIME),
-      createEvent(EUROPE_PARIS_TIMEZONE, DayOfWeek.SUNDAY, SECOND_START_TIME));
+    List<Event> events = Arrays.asList(createEvent(EUROPE_PARIS_TIMEZONE, Frequency.WEEKLY, DayOfWeek.SUNDAY, DEFAULT_START_TIME),
+      createEvent(EUROPE_PARIS_TIMEZONE, Frequency.WEEKLY, DayOfWeek.FRIDAY, DEFAULT_START_TIME),
+      createEvent(EUROPE_PARIS_TIMEZONE, Frequency.WEEKLY, DayOfWeek.SUNDAY, SECOND_START_TIME));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
     when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
 
     // on 1.9.2024, it is the first day of the month and is sunday
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_SUNDAY);
-    createEventWeeklyHandler.run(vo);
+    createEventHandler.run(vo);
 
     // 15 events should get created
     verify(dispatcher, times(14)).postRequest(anyString(), any(DiscordEventDTO.class));
@@ -201,20 +207,20 @@ public class CreateEventWeeklyHandlerTest {
   @Test
   public void shouldNotSendDuplicatedEventRequest() {
     // define mock's behaviour
-    List<Event> events = Collections.singletonList(createEvent(JAPAN_TIMEZONE));
+    List<Event> events = Collections.singletonList(createWeeklyEvent(JAPAN_TIMEZONE));
     when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(events);
-    when(dispatcher.postRequest(anyString(), any(DiscordEventDTO.class))).thenReturn(createResponse());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(Collections.emptyList());
+
     // duplicated event should be found
     when(getScheduledEventsHandler.run())
       .thenReturn(Collections.singletonList(
-        createResponse(
-          getUtcLocalDateTime(LocalDate.of(2024,3,3), LocalTime.of(12,0)))
+          createResponse(
+            getUtcLocalDateTime(LocalDate.of(2024, 3, 3), LocalTime.of(12, 0)))
         )
       );
 
-    // on 1.9.2024, it is the first day of the month and is sunday
     CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
-    createEventWeeklyHandler.run(vo);
+    createEventHandler.run(vo);
 
     // only 4 events should get created
     verify(dispatcher, times(4)).postRequest(anyString(), argumentCaptor.capture());
@@ -229,24 +235,74 @@ public class CreateEventWeeklyHandlerTest {
     assertThat(createEventDTOList.get(3).getScheduledStartTime()).isEqualTo("2024-03-31T12:00Z");
   }
 
+  @Test
+  public void createMonthlyEvent() {
+    // define mock's behaviour
+    List<Event> events = Arrays.asList(createMonthlyEvent(Frequency.MONTHLY_EVERY_FIRST), createMonthlyEvent(Frequency.MONTHLY_EVERY_FOURTH));
+    when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(Collections.emptyList());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(events);
+    // duplicated event should be found
+    when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
+
+    // on 1.9.2024, it is the first day of the month and is sunday
+    CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_IN_WINTER_TIME);
+    createEventHandler.run(vo);
+
+    // only 4 events should get created
+    verify(dispatcher, times(2)).postRequest(anyString(), argumentCaptor.capture());
+
+    var createEventDTOList = argumentCaptor.getAllValues();
+
+    // validate event dates
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-03-03T12:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-03-24T12:00Z");
+  }
+
+  @Test
+  public void createMonthlyEventWhenFirstDayIsThatDay() {
+    // define mock's behaviour
+    List<Event> events = Arrays.asList(createMonthlyEvent(Frequency.MONTHLY_EVERY_FIRST), createMonthlyEvent(Frequency.MONTHLY_EVERY_FOURTH));
+    when(repository.findByFrequency(Frequency.WEEKLY)).thenReturn(Collections.emptyList());
+    when(repository.findByFrequencyIn(any(Frequency[].class))).thenReturn(events);
+    // duplicated event should be found
+    when(getScheduledEventsHandler.run()).thenReturn(Collections.emptyList());
+
+    // on 1.9.2024, it is the first day of the month and is sunday
+    CreateEventVO vo = createEventVO(FIRST_DAY_OF_MONTH_SUNDAY);
+    createEventHandler.run(vo);
+
+    // only 4 events should get created
+    verify(dispatcher, times(2)).postRequest(anyString(), argumentCaptor.capture());
+
+    var createEventDTOList = argumentCaptor.getAllValues();
+
+    // validate event dates
+    assertThat(createEventDTOList.get(0).getScheduledStartTime()).isEqualTo("2024-09-01T12:00Z");
+    assertThat(createEventDTOList.get(1).getScheduledStartTime()).isEqualTo("2024-09-22T12:00Z");
+  }
+
   private CreateEventVO createEventVO(LocalDate firstDayOfMonth) {
     return CreateEventVO.builder()
       .firstDayOfMonth(firstDayOfMonth)
       .build();
   }
 
-  private Event createEvent(String timezone) {
-    return createEvent(timezone, DayOfWeek.SUNDAY, DEFAULT_START_TIME);
+  private Event createWeeklyEvent(String timezone) {
+    return createEvent(timezone, Frequency.WEEKLY, DayOfWeek.SUNDAY, DEFAULT_START_TIME);
   }
 
-  private Event createEvent(String timezone, DayOfWeek dayOfWeek, Integer startTime) {
+  private Event createMonthlyEvent(Frequency frequency) {
+    return createEvent(JAPAN_TIMEZONE, frequency, DayOfWeek.SUNDAY, DEFAULT_START_TIME);
+  }
+
+  private Event createEvent(String timezone, Frequency frequency, DayOfWeek dayOfWeek, Integer startTime) {
     return Event.builder()
       .guildId(GUILD_ID)
       .channelId(CHANNEL_ID)
       .name(NAME)
       .description(DESCRIPTION)
       .timeZone(timezone)
-      .frequency(Frequency.WEEKLY)
+      .frequency(frequency)
       .dayOfWeek(dayOfWeek)
       .startTime(startTime)
       .build();
@@ -254,7 +310,7 @@ public class CreateEventWeeklyHandlerTest {
 
   private DiscordEventDTO createResponse() {
     return createResponse(
-      getUtcLocalDateTime(LocalDate.of(2024, 3, 3), LocalTime.of(12,0))
+      getUtcLocalDateTime(LocalDate.of(2024, 3, 3), LocalTime.of(12, 0))
     );
   }
 

@@ -6,13 +6,14 @@ import lombok.Getter;
 public enum Frequency {
 
   WEEKLY(null),
-  MONTHLY_EVERY_SECOND(2),
-  MONTHLY_EVERY_THIRD(3),
-  MONTHLY_EVERY_FOURTH(4);
+  MONTHLY_EVERY_FIRST(0),
+  MONTHLY_EVERY_SECOND(1),
+  MONTHLY_EVERY_THIRD(2),
+  MONTHLY_EVERY_FOURTH(3);
 
-  private final Integer weekInMonth;
+  private final Integer weekInMonthOffset;
 
-  Frequency(Integer weekInMonth) {
-    this.weekInMonth = weekInMonth;
+  Frequency(Integer weekInMonthOffset) {
+    this.weekInMonthOffset = weekInMonthOffset;
   }
 }
