@@ -33,7 +33,7 @@ public class DiscordEventControllerIT {
   @Test
   public void testGetListOfScheduledEvents() throws Exception {
     mockMvc.perform(
-        get("/scheduler/list/events")
+        get("/scheduled-event/list")
           .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk());
   }
@@ -41,7 +41,7 @@ public class DiscordEventControllerIT {
   @Test
   public void testCreateWeeklyEvent() throws Exception {
     mockMvc.perform(
-        post("/scheduler/create/weekly")
+        post("/scheduled-event/create")
           .contentType(MediaType.APPLICATION_JSON)
           .content("{\"first_day_of_month\": \"2024-03-01\"}")
       )
@@ -51,7 +51,7 @@ public class DiscordEventControllerIT {
   @Test
   public void testDeleteEventByDate() throws Exception {
     mockMvc.perform(
-        delete("/scheduler")
+        delete("/scheduled-event")
           .contentType(MediaType.APPLICATION_JSON)
           .content("{\"time_zone\": \"ECT\",\"cancelled_date\": \"2024-02-19\"}")
       )

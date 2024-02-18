@@ -2,7 +2,7 @@ package org.shino.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
-import org.shino.model.dto.DiscordEventDTO;
+import org.shino.model.DiscordEventRecord;
 import org.shino.model.vo.DeleteEventVO;
 import org.springframework.stereotype.Component;
 
@@ -24,35 +24,35 @@ public class DeleteEventHandler {
     StringBuilder outputBuilder = new StringBuilder();
     String baseUrl = "scheduled-events/";
 
-    List<DiscordEventDTO> existingEvents = getScheduledEventsHandler.run();
-    existingEvents.sort(Comparator.comparing(DiscordEventDTO::getScheduledStartTime));
+    List<DiscordEventRecord> existingEvents = getScheduledEventsHandler.run();
+    existingEvents.sort(Comparator.comparing(DiscordEventRecord::scheduledStartTime));
 
-    List<DiscordEventDTO> eventsToDelete = getEventsToDelete(eventVO, existingEvents);
+    List<DiscordEventRecord> eventsToDelete = getEventsToDelete(eventVO, existingEvents);
 
     int count = 0;
     outputBuilder.append("The event to be deleted on [")
-      .append(eventVO.getCancelledDate())
+      .append(eventVO.cancelledDate())
       .append("]\n");
-    for (DiscordEventDTO dto : eventsToDelete) {
-      String tailedUrl = baseUrl + dto.getId();
+    for (DiscordEventRecord dto : eventsToDelete) {
+      String tailedUrl = baseUrl + dto.id();
       dispatcher.deleteRequest(tailedUrl);
-      outputBuilder.append(dto.getName()).append("\n");
+      outputBuilder.append(dto.name()).append("\n");
       count++;
     }
     outputBuilder.append("Total deleted events: ").append(count);
     return outputBuilder.toString();
   }
 
-  private List<DiscordEventDTO> getEventsToDelete(DeleteEventVO vo, List<DiscordEventDTO> existingEvents) {
-    List<DiscordEventDTO> list = new ArrayList<>();
-    ZonedDateTime startDateTime = ZonedDateTime.of(vo.getCancelledDate(), LocalTime.MIN, ZoneId.of(vo.getTimeZone(), ZoneId.SHORT_IDS));
-    ZonedDateTime endDateTime = ZonedDateTime.of(vo.getCancelledDate(), LocalTime.MAX, ZoneId.of(vo.getTimeZone(), ZoneId.SHORT_IDS));
+  private List<DiscordEventRecord> getEventsToDelete(DeleteEventVO vo, List<DiscordEventRecord> existingEvents) {
+    List<DiscordEventRecord> list = new ArrayList<>();
+    ZonedDateTime startDateTime = ZonedDateTime.of(vo.cancelledDate(), LocalTime.MIN, ZoneId.of(vo.timeZone(), ZoneId.SHORT_IDS));
+    ZonedDateTime endDateTime = ZonedDateTime.of(vo.cancelledDate(), LocalTime.MAX, ZoneId.of(vo.timeZone(), ZoneId.SHORT_IDS));
 
-    for (DiscordEventDTO dto : existingEvents) {
-      if (dto.getScheduledStartTime().isBefore(startDateTime)) {
+    for (DiscordEventRecord dto : existingEvents) {
+      if (dto.scheduledStartTime().isBefore(startDateTime)) {
         continue;
       }
-      if (dto.getScheduledStartTime().isAfter(endDateTime)) {
+      if (dto.scheduledStartTime().isAfter(endDateTime)) {
         return list;
       }
       list.add(dto);

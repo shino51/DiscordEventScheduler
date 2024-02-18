@@ -1,10 +1,11 @@
 package org.shino.service;
 
 import lombok.RequiredArgsConstructor;
+import org.shino.exception.DiscordEventDispatcherException;
 import org.shino.handler.CreateEventHandler;
 import org.shino.handler.DeleteEventHandler;
 import org.shino.handler.GetScheduledEventsHandler;
-import org.shino.model.dto.DiscordEventDTO;
+import org.shino.model.DiscordEventRecord;
 import org.shino.model.vo.CreateEventVO;
 import org.shino.model.vo.DeleteEventVO;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,11 @@ public class DiscordEventService {
   private final GetScheduledEventsHandler getScheduledEventsHandler;
   private final DeleteEventHandler deleteEventHandler;
 
-  public List<DiscordEventDTO> getListOfScheduledEvents() {
+  public List<DiscordEventRecord> getListOfScheduledEvents() {
     return getScheduledEventsHandler.run();
   }
 
-  public List<DiscordEventDTO> createWeeklyEvent(CreateEventVO createEventVO) {
+  public List<DiscordEventRecord> createWeeklyEvent(CreateEventVO createEventVO) throws DiscordEventDispatcherException {
     return createEventHandler.run(createEventVO);
   }
 

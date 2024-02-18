@@ -1,10 +1,11 @@
 package org.shino.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.shino.exception.DiscordEventDispatcherException;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
 import org.shino.model.Event;
 import org.shino.model.Frequency;
-import org.shino.model.dto.DiscordEventDTO;
+import org.shino.model.DiscordEventRecord;
 import org.shino.model.vo.CreateEventVO;
 import org.shino.repository.EventRepository;
 import org.springframework.stereotype.Component;
@@ -23,24 +24,24 @@ public class CreateEventHandler {
   private final DiscordEventDispatcher dispatcher;
   private final GetScheduledEventsHandler getScheduledEventsHandler;
 
-  public List<DiscordEventDTO> run(CreateEventVO eventVO) {
+  public List<DiscordEventRecord> run(CreateEventVO eventVO) throws DiscordEventDispatcherException {
 
-    List<DiscordEventDTO> output = new ArrayList<>();
+    List<DiscordEventRecord> output = new ArrayList<>();
     String tailedUrl = "scheduled-events";
 
-    List<DiscordEventDTO> existingEvents = getScheduledEventsHandler.run();
-    List<DiscordEventDTO> dtoList = createEventDTOs(eventVO, existingEvents);
-    for (DiscordEventDTO dto : dtoList) {
-      output.add(dispatcher.postRequest(tailedUrl, dto));
+    List<DiscordEventRecord> existingEvents = getScheduledEventsHandler.run();
+    List<DiscordEventRecord> dtoList = createEventDTOs(eventVO, existingEvents);
+    for (DiscordEventRecord dto : dtoList) {
+      output.add(dispatcher.postRequest(tailedUrl, dto, 0));
     }
     return output;
   }
 
-  private List<DiscordEventDTO> createEventDTOs(CreateEventVO vo, List<DiscordEventDTO> existingEvents) {
-    List<DiscordEventDTO> list = new ArrayList<>();
+  private List<DiscordEventRecord> createEventDTOs(CreateEventVO vo, List<DiscordEventRecord> existingEvents) {
+    List<DiscordEventRecord> list = new ArrayList<>();
 
     // get how many weeks in this month
-    LocalDate firstDayOfMonth = vo.getFirstDayOfMonth();
+    LocalDate firstDayOfMonth = vo.firstDayOfMonth();
     // create event only within the month. This is used to terminate the event creation
     ZonedDateTime firstDayOfNextMonth = getUtcLocalDateTime("UTC", firstDayOfMonth.plusMonths(1), LocalTime.of(0, 0));
 
@@ -53,7 +54,7 @@ public class CreateEventHandler {
     return list;
   }
 
-  private void createWeeklyEventsDTO(List<DiscordEventDTO> existingEvents, List<DiscordEventDTO> list, LocalDate firstDayOfMonth, ZonedDateTime firstDayOfNextMonth) {
+  private void createWeeklyEventsDTO(List<DiscordEventRecord> existingEvents, List<DiscordEventRecord> list, LocalDate firstDayOfMonth, ZonedDateTime firstDayOfNextMonth) {
     List<Event> events = repository.findByFrequency(Frequency.WEEKLY);
     for (Event event : events) {
       DayOfWeek eventDay = event.getDayOfWeek();
@@ -73,7 +74,7 @@ public class CreateEventHandler {
     }
   }
 
-  private void createMonthlyEventsDTO(List<DiscordEventDTO> existingEvents, List<DiscordEventDTO> list, LocalDate firstDayOfMonth, ZonedDateTime firstDayOfNextMonth) {
+  private void createMonthlyEventsDTO(List<DiscordEventRecord> existingEvents, List<DiscordEventRecord> list, LocalDate firstDayOfMonth, ZonedDateTime firstDayOfNextMonth) {
     List<Event> events = repository.findByFrequencyIn(
       Frequency.MONTHLY_EVERY_FIRST,
       Frequency.MONTHLY_EVERY_SECOND,
@@ -104,8 +105,8 @@ public class CreateEventHandler {
       .withZoneSameInstant(ZoneOffset.UTC);
   }
 
-  private DiscordEventDTO createDTOByEvent(Event event, ZonedDateTime utcDateTime) {
-    return DiscordEventDTO.builder()
+  private DiscordEventRecord createDTOByEvent(Event event, ZonedDateTime utcDateTime) {
+    return DiscordEventRecord.builder()
       .channelId(event.getChannelId())
       .name(event.getName())
       .description(event.getDescription())

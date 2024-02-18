@@ -2,7 +2,8 @@ package org.shino.handler.dispatcher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.shino.model.dto.DiscordEventDTO;
+import org.shino.exception.DiscordEventDispatcherException;
+import org.shino.model.DiscordEventRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -34,10 +35,14 @@ public class DiscordEventDispatcher {
   @Value("${guild.id}")
   private String guildId;
 
-  public List<DiscordEventDTO> getRequest(String tailedUrl) {
-    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
+  private String baseUrl;
 
-    ResponseEntity<List<DiscordEventDTO>> response = restTemplate.exchange(
+  private static final int MAX_RETRY_COUNT = 5;
+
+  public List<DiscordEventRecord> getRequest(String tailedUrl) {
+    String url = getBaseUrl() + tailedUrl;
+
+    ResponseEntity<List<DiscordEventRecord>> response = restTemplate.exchange(
       url,
       HttpMethod.GET,
       new HttpEntity<>(createHeader()),
@@ -47,31 +52,34 @@ public class DiscordEventDispatcher {
     return response.getBody();
   }
 
-  public DiscordEventDTO postRequest(String tailedUrl, DiscordEventDTO body) {
-    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
+  public DiscordEventRecord postRequest(String tailedUrl, DiscordEventRecord body, int retryCount) throws DiscordEventDispatcherException {
+    String url = getBaseUrl() + tailedUrl;
 
-    HttpEntity<DiscordEventDTO> requestEntity = new HttpEntity<>(body, createHeader());
+    HttpEntity<DiscordEventRecord> requestEntity = new HttpEntity<>(body, createHeader());
     try {
-      ResponseEntity<DiscordEventDTO> response = restTemplate.postForEntity(
+      ResponseEntity<DiscordEventRecord> response = restTemplate.postForEntity(
         url,
         requestEntity,
-        DiscordEventDTO.class
+        DiscordEventRecord.class
       );
       return response.getBody();
     } catch (HttpClientErrorException exception) {
       if (exception.getMessage().contains("You are being rate limited")) {
         try {
-          TimeUnit.MINUTES.sleep(1);
-          return postRequest(tailedUrl, body);
+          if (retryCount == MAX_RETRY_COUNT) {
+            throw new DiscordEventDispatcherException("", exception);
+          }
+          TimeUnit.SECONDS.sleep(10);
+          return postRequest(tailedUrl, body, ++retryCount);
         } catch(InterruptedException interruptedException) {
           log.error("unable to hold the thread. " + interruptedException.getMessage());
           Thread.currentThread().interrupt();
-          return DiscordEventDTO.builder()
+          return DiscordEventRecord.builder()
             .guildScheduledEventExceptions(Arrays.asList(exception.getMessage(), interruptedException.getMessage()))
             .build();
         }
       } else {
-        return DiscordEventDTO.builder()
+        return DiscordEventRecord.builder()
           .guildScheduledEventExceptions(Collections.singletonList(exception.getMessage()))
           .build();
       }
@@ -79,7 +87,7 @@ public class DiscordEventDispatcher {
   }
 
   public void deleteRequest(String tailedUrl) {
-    String url = discordApiUrl + "/guilds/" + guildId + "/" + tailedUrl;
+    String url = getBaseUrl() + tailedUrl;
     restTemplate.exchange(url, HttpMethod.DELETE, new HttpEntity<>(createHeader()), String.class);
   }
 
@@ -88,5 +96,12 @@ public class DiscordEventDispatcher {
     headers.add("Content-Type", "application/json");
     headers.add("Authorization", authToken);
     return headers;
+  }
+
+  private String getBaseUrl() {
+    if (baseUrl == null) {
+      baseUrl = discordApiUrl + "/guilds/" + guildId + "/";
+    }
+    return baseUrl;
   }
 }

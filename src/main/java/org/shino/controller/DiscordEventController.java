@@ -2,7 +2,8 @@ package org.shino.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.shino.model.dto.DiscordEventDTO;
+import org.shino.exception.DiscordEventDispatcherException;
+import org.shino.model.DiscordEventRecord;
 import org.shino.model.vo.CreateEventVO;
 import org.shino.model.vo.DeleteEventVO;
 import org.shino.service.DiscordEventService;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/scheduler")
+@RequestMapping("/scheduled-event")
 @RequiredArgsConstructor
 public class DiscordEventController {
 
@@ -23,18 +24,18 @@ public class DiscordEventController {
   @Value("${discord.api.url}")
   private String discordApiUrl;
 
-  @GetMapping("/list/events")
+  @GetMapping("/list")
   @ResponseBody
-  public ResponseEntity<List<DiscordEventDTO>> getListOfScheduledEvents() {
-    List<DiscordEventDTO> result = service.getListOfScheduledEvents();
+  public ResponseEntity<List<DiscordEventRecord>> getListOfScheduledEvents() {
+    List<DiscordEventRecord> result = service.getListOfScheduledEvents();
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
-  @PostMapping("/create/weekly")
+  @PostMapping("/create")
   @ResponseBody
-  public ResponseEntity<List<DiscordEventDTO>> createWeeklyEvent(@RequestBody CreateEventVO createEventVO) {
+  public ResponseEntity<List<DiscordEventRecord>> createWeeklyEvent(@RequestBody CreateEventVO createEventVO) throws DiscordEventDispatcherException {
     // call discord API to create a event
-    List<DiscordEventDTO> result = service.createWeeklyEvent(createEventVO);
+    List<DiscordEventRecord> result = service.createWeeklyEvent(createEventVO);
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 

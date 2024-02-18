@@ -2,7 +2,7 @@ package org.shino.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.shino.handler.dispatcher.DiscordEventDispatcher;
-import org.shino.model.dto.DiscordEventDTO;
+import org.shino.model.DiscordEventRecord;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class GetScheduledEventsHandler {
 
   private static final String TAILED_URL = "scheduled-events";
 
-  public List<DiscordEventDTO> run() {
+  public List<DiscordEventRecord> run() {
     return eventDispatcher.getRequest(TAILED_URL);
   }
 }
